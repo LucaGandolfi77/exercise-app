@@ -213,38 +213,94 @@
         .workout-complete {
             background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
         }
+        
+        /* Nuovi stili per la pagina iniziale */
+        .start-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .start-page h1 {
+            font-size: 2.5em;
+            margin-bottom: 40px;
+        }
+        
+        .workout-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .workout-btn {
+            padding: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .workout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <div class="header">
-            <h1>💪 Fitness Tracker</h1>
-            <div class="workout-info">
-                <span id="currentExercise">Esercizio 1/6</span>
-                <span id="totalTime">20:00</span>
+        
+        <div class="start-page" id="startPage">
+            <h1>Scegli il tuo allenamento</h1>
+            <div class="workout-list">
+                <button class="workout-btn" data-workout-set="cardio">Cardio Rapido 🏃‍♀️</button>
+                <button class="workout-btn" data-workout-set="fullbody">Full Body 🔥</button>
             </div>
         </div>
 
-        <div class="exercise-section">
-            <h2 class="exercise-name" id="exerciseName">Push-up</h2>
-            
-            <div class="exercise-visual">
-                <div class="exercise-placeholder" id="exerciseVisual">
-                    🏃‍♂️ Animazione esercizio
+        <div class="workout-page hidden" id="workoutPage">
+            <div class="header">
+                <h1>💪 Fitness Tracker</h1>
+                <div class="workout-info">
+                    <span id="currentExercise"></span>
+                    <span id="totalTime"></span>
                 </div>
             </div>
-        </div>
 
-        <div class="timer-section">
-            <div class="timer-display" id="timerDisplay">00:30</div>
-            
-            <div class="timer-bar">
-                <div class="timer-progress" id="timerProgress"></div>
+            <div class="exercise-section">
+                <h2 class="exercise-name" id="exerciseName"></h2>
+                
+                <div class="exercise-visual">
+                    <div class="exercise-placeholder" id="exerciseVisual">
+                        🏃‍♂️ Esegui l'esercizio
+                    </div>
+                </div>
             </div>
-            
-            <div class="controls">
-                <button class="btn btn-secondary" id="pauseBtn">⏸️ Pausa</button>
-                <button class="btn btn-primary" id="nextBtn">⏭️ Avanti</button>
+
+            <div class="timer-section">
+                <div class="timer-display" id="timerDisplay"></div>
+                
+                <div class="timer-bar">
+                    <div class="timer-progress" id="timerProgress"></div>
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-secondary" id="pauseBtn">⏸️ Pausa</button>
+                    <button class="btn btn-primary" id="nextBtn">⏭️ Avanti</button>
+                </div>
             </div>
         </div>
     </div>
@@ -254,36 +310,45 @@
     <script>
         class FitnessTracker {
             constructor() {
-                /*this.exercises = [
-                    { name: 'Push-up', duration: 30, rest: 10, emoji: '💪' },
-                    { name: 'Squat', duration: 45, rest: 15, emoji: '🦵' },
-                    { name: 'Plank', duration: 60, rest: 20, emoji: '🧘‍♂️' },
-                    { name: 'Jumping Jacks', duration: 30, rest: 10, emoji: '🤸‍♀️' },
-                    { name: 'Mountain Climbers', duration: 40, rest: 15, emoji: '🏔️' },
-                    { name: 'Burpees', duration: 30, rest: 10, emoji: '🔥' }
-                ];*/
+                this.allWorkouts = {
+                    cardio: [
+                        { name: 'Jumping Jacks', duration: 45, rest: 15, emoji: '🤸‍♀️' },
+                        { name: 'Skip laterale x10', duration: 40, rest: 15, emoji: '🏃‍♂️' },
+                        { name: 'Out Out In In Jumps', duration: 30, rest: 10, emoji: '🦵' },
+                        { name: 'Burpees', duration: 45, rest: 20, emoji: '🔥' },
+                        { name: 'Air Squat', duration: 40, rest: 15, emoji: '🏋️' },
+                        { name: 'Side to Side Squat', duration: 40, rest: 15, emoji: '🚶‍♀️' },
+                        { name: 'Wall Ball', duration: 50, rest: 20, emoji: '🏀' },
+                        { name: 'Affondi indietro', duration: 45, rest: 15, emoji: '🚶‍♂️' },
+                        { name: 'X Jump', duration: 30, rest: 10, emoji: '🦘' },
+                        { name: 'Squat Jack', duration: 35, rest: 15, emoji: '🤸‍♂️' },
+                        { name: 'Affondo Affondo Burpee', duration: 50, rest: 20, emoji: '💥' },
+                        { name: 'Scalatore dinamico', duration: 40, rest: 15, emoji: '🏔️' },
+                        { name: 'Deadbug', duration: 50, rest: 15, emoji: '🐞' },
+                        { name: 'Superman Pushup', duration: 45, rest: 20, emoji: '🦸‍♂️' },
+                        { name: 'Push up & Toe Tap', duration: 40, rest: 15, emoji: '👆' }
+                    ],
+                    fullbody: [
+                        { name: 'Corsa sul posto', duration: 45, rest: 15, emoji: '🏃‍♂️' },
+                        { name: 'Skip laterale', duration: 40, rest: 15, emoji: '🚶‍♀️' },
+                        { name: '4 Skip + 4 Scalatore', duration: 50, rest: 20, emoji: '🏔️' },
+                        { name: 'Burpees 180°', duration: 45, rest: 20, emoji: '🔥' },
+                        { name: 'Affondo avanti/indietro', duration: 40, rest: 15, emoji: '🚶‍♂️' },
+                        { name: 'Squat Jump', duration: 30, rest: 10, emoji: '🐸' },
+                        { name: 'Skater Jump', duration: 35, rest: 15, emoji: '⛸️' },
+                        { name: 'Squat Burpees', duration: 50, rest: 20, emoji: '💥' },
+                        { name: 'Affondi Saltati', duration: 40, rest: 15, emoji: '🦵' },
+                        { name: 'Bicycle Crunch', duration: 45, rest: 15, emoji: '🚴' },
+                        { name: 'Side Plank & Raised Leg', duration: 50, rest: 15, emoji: '🧘‍♀️' },
+                        { name: 'Superman Pushup', duration: 45, rest: 20, emoji: '🦸‍♂️' },
+                        { name: 'Push-up & Push-back', duration: 40, rest: 15, emoji: '👆' }
+                    ]
+                };
 
-                this.exercises = [
-                    { name: 'Jumping Jacks', duration: 45, rest: 15, emoji: '🤸‍♀️' },
-                    { name: 'Skip laterale x10', duration: 40, rest: 15, emoji: '🏃‍♂️' },
-                    { name: 'Out Out In In Jumps', duration: 30, rest: 10, emoji: '🦵' },
-                    { name: 'Burpees', duration: 45, rest: 20, emoji: '🔥' },
-                    { name: 'Air Squat', duration: 40, rest: 15, emoji: '🏋️' },
-                    { name: 'Side to Side Squat', duration: 40, rest: 15, emoji: '🚶‍♀️' },
-                    { name: 'Wall Ball', duration: 50, rest: 20, emoji: '🏀' },
-                    { name: 'Affondi indietro', duration: 45, rest: 15, emoji: '🚶‍♂️' },
-                    { name: 'X Jump', duration: 30, rest: 10, emoji: '🦘' },
-                    { name: 'Squat Jack', duration: 35, rest: 15, emoji: '🤸‍♂️' },
-                    { name: 'Affondo Affondo Burpee', duration: 50, rest: 20, emoji: '💥' },
-                    { name: 'Scalatore dinamico', duration: 40, rest: 15, emoji: '🏔️' },
-                    { name: 'Deadbug', duration: 50, rest: 15, emoji: '🐞' },
-                    { name: 'Superman Pushup', duration: 45, rest: 20, emoji: '🦸‍♂️' },
-                    { name: 'Push up & Toe Tap', duration: 40, rest: 15, emoji: '👆' }
-                ];
-
+                this.exercises = [];
                 this.currentExerciseIndex = 0;
-                this.timeRemaining = this.exercises[0].duration;
-                this.totalDuration = this.exercises[0].duration;
+                this.timeRemaining = 0;
+                this.totalDuration = 0;
                 this.isRunning = false;
                 this.isPaused = false;
                 this.isResting = false;
@@ -291,11 +356,14 @@
                 this.timer = null;
 
                 this.initElements();
-                this.updateDisplay();
-                this.startTimer();
+                this.setupSelectionListeners();
             }
 
             initElements() {
+                this.startPage = document.getElementById('startPage');
+                this.workoutPage = document.getElementById('workoutPage');
+                this.workoutButtons = document.querySelectorAll('.workout-btn');
+
                 this.timerDisplay = document.getElementById('timerDisplay');
                 this.timerProgress = document.getElementById('timerProgress');
                 this.exerciseName = document.getElementById('exerciseName');
@@ -308,6 +376,34 @@
 
                 this.pauseBtn.addEventListener('click', () => this.togglePause());
                 this.nextBtn.addEventListener('click', () => this.nextExercise());
+            }
+
+            setupSelectionListeners() {
+                this.workoutButtons.forEach(button => {
+                    button.addEventListener('click', (event) => {
+                        const workoutSet = event.target.dataset.workoutSet;
+                        this.startWorkout(workoutSet);
+                    });
+                });
+            }
+
+            startWorkout(workoutSet) {
+                this.exercises = this.allWorkouts[workoutSet];
+                if (!this.exercises) {
+                    console.error('Invalid workout set selected:', workoutSet);
+                    return;
+                }
+
+                this.startPage.classList.add('hidden');
+                this.workoutPage.classList.remove('hidden');
+
+                this.currentExerciseIndex = 0;
+                this.timeRemaining = this.exercises[0].duration;
+                this.totalDuration = this.exercises[0].duration;
+
+                this.updateDisplay();
+                this.startTimer();
+                this.showMessage('Allenamento iniziato!');
             }
 
             formatTime(seconds) {
@@ -370,7 +466,7 @@
                         
                         if (this.timeRemaining <= 0) {
                             if (this.isResting) {
-                                this.startExercise();
+                                this.nextExercise();
                             } else {
                                 this.startRest();
                             }
@@ -415,14 +511,10 @@
                 }
 
                 if (this.isResting) {
+                    this.currentExerciseIndex++;
                     this.startExercise();
                 } else {
-                    if (this.currentExerciseIndex < this.exercises.length - 1) {
-                        this.currentExerciseIndex++;
-                        this.startRest();
-                    } else {
-                        this.completeWorkout();
-                    }
+                    this.startRest();
                 }
                 
                 this.updateDisplay();
@@ -447,22 +539,22 @@
             }
 
             resetWorkout() {
-                this.currentExerciseIndex = 0;
-                this.timeRemaining = this.exercises[0].duration;
-                this.totalDuration = this.exercises[0].duration;
-                this.isRunning = false;
-                this.isPaused = false;
-                this.isResting = false;
                 this.isComplete = false;
-                
                 document.body.classList.remove('workout-complete', 'rest-mode');
                 this.pauseBtn.style.display = 'inline-block';
                 this.nextBtn.textContent = '⏭️ Avanti';
                 
+                // Hide workout page and show start page
+                this.workoutPage.classList.add('hidden');
+                this.startPage.classList.remove('hidden');
+
+                // Clean up state
                 clearInterval(this.timer);
-                this.updateDisplay();
-                this.startTimer();
-                this.showMessage('Nuovo allenamento iniziato!');
+                this.isRunning = false;
+                this.isPaused = false;
+                this.isResting = false;
+
+                this.showMessage('Scegli un nuovo allenamento');
             }
 
             showMessage(message) {
