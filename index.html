@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Fitness Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            overflow: hidden;
+            color: white;
+            touch-action: manipulation;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 414px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            padding: 60px 20px 20px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .workout-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .exercise-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .exercise-name {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .exercise-visual {
+            width: 280px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 40px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            overflow: hidden;
+        }
+
+        .exercise-gif {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+        }
+
+        .exercise-placeholder {
+            font-size: 18px;
+            text-align: center;
+            opacity: 0.7;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .timer-section {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .timer-display {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-family: 'SF Mono', Monaco, monospace;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .timer-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .timer-progress {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            border-radius: 4px;
+            transition: width 0.1s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            min-width: 120px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:hover, .btn:active {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .status-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px 30px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .status-message.show {
+            opacity: 1;
+        }
+
+        @media (max-height: 600px) {
+            .exercise-visual {
+                width: 200px;
+                height: 150px;
+            }
+            
+            .timer-display {
+                font-size: 36px;
+            }
+            
+            .exercise-name {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+        }
+
+        .rest-mode {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .rest-mode .exercise-visual {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .workout-complete {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>💪 Fitness Tracker</h1>
+            <div class="workout-info">
+                <span id="currentExercise">Esercizio 1/6</span>
+                <span id="totalTime">20:00</span>
+            </div>
+        </div>
+
+        <div class="exercise-section">
+            <h2 class="exercise-name" id="exerciseName">Push-up</h2>
+            
+            <div class="exercise-visual">
+                <div class="exercise-placeholder" id="exerciseVisual">
+                    🏃‍♂️ Animazione esercizio
+                </div>
+            </div>
+        </div>
+
+        <div class="timer-section">
+            <div class="timer-display" id="timerDisplay">00:30</div>
+            
+            <div class="timer-bar">
+                <div class="timer-progress" id="timerProgress"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-secondary" id="pauseBtn">⏸️ Pausa</button>
+                <button class="btn btn-primary" id="nextBtn">⏭️ Avanti</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-message" id="statusMessage"></div>
+
+    <script>
+        class FitnessTracker {
+            constructor() {
+                this.exercises = [
+                    { name: 'Push-up', duration: 30, rest: 10, emoji: '💪' },
+                    { name: 'Squat', duration: 45, rest: 15, emoji: '🦵' },
+                    { name: 'Plank', duration: 60, rest: 20, emoji: '🧘‍♂️' },
+                    { name: 'Jumping Jacks', duration: 30, rest: 10, emoji: '🤸‍♀️' },
+                    { name: 'Mountain Climbers', duration: 40, rest: 15, emoji: '🏔️' },
+                    { name: 'Burpees', duration: 30, rest: 10, emoji: '🔥' }
+                ];
+
+                this.currentExerciseIndex = 0;
+                this.timeRemaining = this.exercises[0].duration;
+                this.totalDuration = this.exercises[0].duration;
+                this.isRunning = false;
+                this.isPaused = false;
+                this.isResting = false;
+                this.isComplete = false;
+                this.timer = null;
+
+                this.initElements();
+                this.updateDisplay();
+                this.startTimer();
+            }
+
+            initElements() {
+                this.timerDisplay = document.getElementById('timerDisplay');
+                this.timerProgress = document.getElementById('timerProgress');
+                this.exerciseName = document.getElementById('exerciseName');
+                this.exerciseVisual = document.getElementById('exerciseVisual');
+                this.currentExerciseEl = document.getElementById('currentExercise');
+                this.totalTimeEl = document.getElementById('totalTime');
+                this.pauseBtn = document.getElementById('pauseBtn');
+                this.nextBtn = document.getElementById('nextBtn');
+                this.statusMessage = document.getElementById('statusMessage');
+
+                this.pauseBtn.addEventListener('click', () => this.togglePause());
+                this.nextBtn.addEventListener('click', () => this.nextExercise());
+            }
+
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            updateDisplay() {
+                if (this.isComplete) {
+                    this.showWorkoutComplete();
+                    return;
+                }
+
+                const currentExercise = this.exercises[this.currentExerciseIndex];
+                
+                if (this.isResting) {
+                    this.exerciseName.textContent = `Riposo prima di: ${currentExercise.name}`;
+                    this.exerciseVisual.innerHTML = '😴 Riposo...';
+                    document.body.classList.add('rest-mode');
+                } else {
+                    this.exerciseName.textContent = currentExercise.name;
+                    this.exerciseVisual.innerHTML = `${currentExercise.emoji} Esegui l'esercizio`;
+                    document.body.classList.remove('rest-mode');
+                }
+
+                this.timerDisplay.textContent = this.formatTime(this.timeRemaining);
+                
+                const progress = ((this.totalDuration - this.timeRemaining) / this.totalDuration) * 100;
+                this.timerProgress.style.width = `${progress}%`;
+
+                this.currentExerciseEl.textContent = `Esercizio ${this.currentExerciseIndex + 1}/${this.exercises.length}`;
+                
+                const totalRemaining = this.calculateTotalTimeRemaining();
+                this.totalTimeEl.textContent = this.formatTime(totalRemaining);
+
+                this.pauseBtn.textContent = this.isPaused ? '▶️ Riprendi' : '⏸️ Pausa';
+            }
+
+            calculateTotalTimeRemaining() {
+                let total = this.timeRemaining;
+                
+                for (let i = this.currentExerciseIndex + 1; i < this.exercises.length; i++) {
+                    total += this.exercises[i].duration;
+                    if (i < this.exercises.length - 1) {
+                        total += this.exercises[i].rest;
+                    }
+                }
+
+                return total;
+            }
+
+            startTimer() {
+                if (this.isRunning) return;
+                
+                this.isRunning = true;
+                this.timer = setInterval(() => {
+                    if (!this.isPaused && !this.isComplete) {
+                        this.timeRemaining--;
+                        
+                        if (this.timeRemaining <= 0) {
+                            if (this.isResting) {
+                                this.startExercise();
+                            } else {
+                                this.startRest();
+                            }
+                        }
+                        
+                        this.updateDisplay();
+                    }
+                }, 1000);
+            }
+
+            startExercise() {
+                this.isResting = false;
+                const currentExercise = this.exercises[this.currentExerciseIndex];
+                this.timeRemaining = currentExercise.duration;
+                this.totalDuration = currentExercise.duration;
+                this.showMessage(`Inizia: ${currentExercise.name}!`);
+            }
+
+            startRest() {
+                if (this.currentExerciseIndex >= this.exercises.length - 1) {
+                    this.completeWorkout();
+                    return;
+                }
+
+                this.isResting = true;
+                const currentExercise = this.exercises[this.currentExerciseIndex];
+                this.timeRemaining = currentExercise.rest;
+                this.totalDuration = currentExercise.rest;
+                this.showMessage('Riposo!');
+            }
+
+            togglePause() {
+                this.isPaused = !this.isPaused;
+                this.showMessage(this.isPaused ? 'In pausa' : 'Ripreso');
+                this.updateDisplay();
+            }
+
+            nextExercise() {
+                if (this.isComplete) {
+                    this.resetWorkout();
+                    return;
+                }
+
+                if (this.isResting) {
+                    this.startExercise();
+                } else {
+                    if (this.currentExerciseIndex < this.exercises.length - 1) {
+                        this.currentExerciseIndex++;
+                        this.startRest();
+                    } else {
+                        this.completeWorkout();
+                    }
+                }
+                
+                this.updateDisplay();
+            }
+
+            completeWorkout() {
+                this.isComplete = true;
+                this.isRunning = false;
+                clearInterval(this.timer);
+                this.showWorkoutComplete();
+            }
+
+            showWorkoutComplete() {
+                document.body.classList.add('workout-complete');
+                this.exerciseName.textContent = 'Allenamento Completato! 🎉';
+                this.exerciseVisual.innerHTML = '🏆 Ben fatto!';
+                this.timerDisplay.textContent = '00:00';
+                this.timerProgress.style.width = '100%';
+                this.pauseBtn.style.display = 'none';
+                this.nextBtn.textContent = '🔄 Ricomincia';
+                this.showMessage('Ottimo lavoro! 💪');
+            }
+
+            resetWorkout() {
+                this.currentExerciseIndex = 0;
+                this.timeRemaining = this.exercises[0].duration;
+                this.totalDuration = this.exercises[0].duration;
+                this.isRunning = false;
+                this.isPaused = false;
+                this.isResting = false;
+                this.isComplete = false;
+                
+                document.body.classList.remove('workout-complete', 'rest-mode');
+                this.pauseBtn.style.display = 'inline-block';
+                this.nextBtn.textContent = '⏭️ Avanti';
+                
+                clearInterval(this.timer);
+                this.updateDisplay();
+                this.startTimer();
+                this.showMessage('Nuovo allenamento iniziato!');
+            }
+
+            showMessage(message) {
+                this.statusMessage.textContent = message;
+                this.statusMessage.classList.add('show');
+                setTimeout(() => {
+                    this.statusMessage.classList.remove('show');
+                }, 2000);
+            }
+        }
+
+        // Previeni il comportamento di zoom su doppio tap
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+
+        // Inizializza l'app quando la pagina è caricata
+        document.addEventListener('DOMContentLoaded', () => {
+            new FitnessTracker();
+        });
+    </script>
+</body>
+</html>
