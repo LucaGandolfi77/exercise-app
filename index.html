@@ -453,7 +453,7 @@
                 const currentExercise = this.exercises[this.currentExerciseIndex];
                 
                 if (this.isResting) {
-                    this.exerciseName.textContent = `Riposo prima di: ${currentExercise.name}`;
+                    this.exerciseName.textContent = `Next: ${currentExercise.name}`;
                     this.exerciseVisual.innerHTML = '😴 Riposo...';
                     document.body.classList.add('rest-mode');
                 } else {
